@@ -1,7 +1,8 @@
 import { IsNotEmpty, IsString } from "class-validator";
+import { CreateRoleDto } from "./create-role.dto";
 
-export class UpdateRoleDto{
-    @IsNotEmpty()
+export class UpdateRoleDto extends CreateRoleDto{
     @IsString()
-    name: string;
+    @IsNotEmpty()
+    age: string;
 }

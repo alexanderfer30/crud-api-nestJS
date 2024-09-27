@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { dirname } from 'path';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -18,8 +18,9 @@ import { dirname } from 'path';
       logging: true,
       synchronize: true,
       autoLoadEntities: true,
-      entities: [__dirname + '/**/*.entity{ts,.js'],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'], 
     }),
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
