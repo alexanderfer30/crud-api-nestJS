@@ -8,8 +8,12 @@ import { DetailsSale } from 'src/details-sales/entities/details-sale.entity';
 import { Product } from 'src/products/entities/product.entity';
 import * as moment from 'moment-timezone'
 import { SaleSearchDto } from './dto/search-sale.dto';
-import { Repository } from 'typeorm';
+import { Between, MoreThan, Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
+import { filter, map } from 'rxjs';
+import { Console, time } from 'console';
+import { DateDto } from './dto/date-sale.dto';
+import { Ganancias } from './dto/get-sale.dto';
 
 
 @Injectable()
@@ -266,16 +270,20 @@ export class SalesService {
     }
     
 
-  reportSales() {
+  /*reportSales() {
     try {
 
     } catch (error) {
       return `This action returns all sales`;
     }
-  }
+  }*/
 
   async findAll({ page, limit }: SaleSearchDto) {
     try {
+      page = page ?? 1
+      limit = limit ?? 5
+      
+      console.log({page, limit})
       const [sales, total] = await this.saleRepository.findAndCount({
         where: {
           isActive: true
@@ -328,15 +336,231 @@ export class SalesService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} sale`;
-  }
+  // findOne(id: number) {
+  //   return `This action returns a #${id} sale`;
+  // }
 
-  update(id: number, updateSaleDto: UpdateSaleDto) {
-    return `This action updates a #${id} sale`;
-  }
+  // update(id: number, updateSaleDto: UpdateSaleDto) {
+  //   return `This action updates a #${id} sale`;
+  // }
 
-  remove(id: number) {
-    return `This action removes a #${id} sale`;
+  // remove(id: number) {
+  //   return `This action removes a #${id} sale`;
+  // }  
+
+  async report() {
+    try {
+      
+      const sales = await this.saleRepository.find({
+        where: { isActive: true },
+        relations: { detailsSale: {
+          products: true
+        }, user: true, }, 
+      });
+  
+      
+
+      const report = sales.map(sale => {
+       
+        return {
+          saleId: sale.id,  
+          user: sale.user.name, 
+          products: sale.detailsSale.map(detail => ({
+            productId: detail.products.name, 
+            quantity: detail.quantity,             
+          })),
+        };
+      });
+  
+      return {
+        ok: true,
+        report,
+        message: 'reporte de ventas',
+        status: HttpStatus.OK,
+      }; 
+    } catch (error) {
+      throw new NotFoundException(`Error ${error.message}`);
+    }
+  } 
+  
+  /*const reporte = sales.map(sales =>{
+    return{
+      products: sales.detailsSale.map(detail => ({
+        productId: detail.products.name, 
+        quantity: detail.quantity,             
+      })),
+    }
+  })
+
+  return {
+    ok: true,
+    reporte,
+    message: 'reporte de ventas',
+    status: HttpStatus.OK,
+  }; 
+} catch (error) {
+  throw new NotFoundException(`Error ${error.message}`);
+}*/
+
+
+ /*const filteredDetailsSale = detaislSale.filter((detail) => {
+    console.log({date, date1: detail.sales.date })
+    return date <= detail.sales.date.toString()
+
+  })*/
+
+  /**El método reduce() en JavaScript es una función 
+ * muy poderosa que sirve para acumular o reducir un array a un solo valor. */
+
+
+async ReporteVentas({date}: DateDto){
+  console.log(date)
+
+  //where se puede utilizar para filtrar diferentes propiedades y relaciones, ejemplo: 
+  const detaislSale = await this.detailSaleRepository.find({
+    where: { sales: { date : date as unknown as Date}, products : {stock: MoreThan(0)},  isActive: true} , 
+    relations: { products: true, sales:true}, 
+  });
+  
+ 
+console.log({});
+
+const reporte = detaislSale.reduce((ventaActual,detail)=>{
+  const productId = detail.products.id;
+  const productName = detail.products.name;
+  const productPrice = detail.products.price;
+
+
+  if(!ventaActual[productId]){
+    ventaActual[productId] = {
+      product: productName,
+      quantity: 0,
+      price: productPrice,
+      total: 0,
+      date: detail.sales.date,
+    };
   }
+  
+  ventaActual[productId].quantity += detail.quantity;
+
+  ventaActual[productId].total += Number(detail.total)
+  return ventaActual
+
+}, {})
+const products = Object.values(reporte)
+return {
+  products
 }
+
+}
+
+async portero(){
+  const productDetails= await this.detailSaleRepository.find({
+    where: {isActive: true},
+    relations: {
+      products: true
+    }
+  })
+
+  const acumular = {}
+
+
+
+productDetails.forEach(productDetails=>{
+  console.log(productDetails);
+    const name = productDetails.products.name;
+
+    const saveProduct = acumular[name]
+
+    if(saveProduct) {
+      productDetails.quantity+=productDetails.quantity
+      return
+    }
+
+    acumular[name] = {
+      name: productDetails.products.name,
+      quantity: productDetails.quantity
+    }
+
+  })
+
+  // console.log(acumular)
+  // console.log(productDetails)
+
+  if (productDetails.length > 0) {
+    return { ok: true, productDetails, status: 200 };
+  }
+
+  return { ok: false, message: 'No se encontraron producto', status: 404 };
+    } catch (error) {
+      return {
+        ok: false,
+        message: 'Ocurrió un error al obtener los productos',
+        status: 500,
+      };
+    }
+  
+
+    /*async ventas({date}: DateDto){
+      console.log(date)
+      const prueba = await this.detailSaleRepository.find({
+        where: {isActive: true, sales: {date: date as unknown as Date}<={date:date as unknown as Date} },
+        relations: {products: true, sales:true}
+      })
+
+      const listadoVentas = await this.saleRepository.find({
+        where: {isActive: true, date:date as unknown as Date },
+      })
+
+     const arregloVentas = listadoVentas.map(sales=>sales)
+     return arregloVentas
+    }*/
+
+     async listado({startDate, endDate}: DateDto) {
+      console.log(startDate, endDate);
+    
+      const listadoVentas = await this.saleRepository.find({
+        where: {
+          isActive: true,
+          date: Between(startDate, endDate),
+        },
+        relations: {detailsSale:{products:true}}
+      });
+
+      
+      const sales = listadoVentas.map((sale, i)=>  {
+        let objeto: Ganancias;
+        const detailsSale = sale.detailsSale;
+       for (const saveDetail of detailsSale) {
+        const priceProduct = Number(saveDetail.products.price);
+        const totalProduct = Number(saveDetail.total);
+        const saleCant = Number(saveDetail.quantity);
+        const unitCost = Number(saveDetail.products.unitCost);
+        
+        const prevCosto = objeto?.costoTotalVenta ?? 0
+        const prevSum = objeto?.ganancia ?? 0
+        const prevcostoTotalCompra = objeto?.costoTotalCompra ?? 0
+
+        const costoTotalCompra =   Number(unitCost) * Number(saleCant) ;
+        const costoTotalVenta = Number(saveDetail.total);
+        const ganancia = prevSum + (Number(totalProduct) - Number(costoTotalCompra)); 
+
+        objeto = {
+          costoTotalVenta: sale.total,
+          ganancia: ganancia,
+          priceProduct: priceProduct,
+          costoTotalCompra: prevcostoTotalCompra + costoTotalCompra
+        }
+        console.log(costoTotalVenta);
+        console.log(ganancia);
+       }
+
+       return {
+        ...sale,
+        ...objeto
+       }
+      });
+      
+      return sales;
+    }
+    }
