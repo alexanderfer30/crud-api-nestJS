@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDetailsSaleDto } from './dto/create-details-sale.dto';
 import { UpdateDetailsSaleDto } from './dto/update-details-sale.dto';
-
-@Injectable()
+import { DetailsSaleSearchDto } from './dto/search-details-sale.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Sale } from 'src/sales/entities/sale.entity';
+import { Product } from 'src/products/entities/product.entity';
+import { Repository } from 'typeorm';
 export class DetailsSalesService {
+  
   create(createDetailsSaleDto: CreateDetailsSaleDto) {
     return 'This action adds a new detailsSale';
   }
