@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { ProductsModule } from './products/products.module';
 import { SalesModule } from './sales/sales.module';
 import { DetailsSalesModule } from './details-sales/details-sales.module';
+import { WebModule } from './webSocket/web.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DetailsSalesModule } from './details-sales/details-sales.module';
     ProductsModule,
     SalesModule,
     DetailsSalesModule,
+    WebModule
   ],
   controllers: [AppController],
   providers: [AppService],

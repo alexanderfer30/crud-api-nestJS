@@ -6,6 +6,7 @@ import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { ProductSearchDto } from './dto/product-search.dto';
 import { throwError } from 'rxjs';
+import { Sale } from 'src/sales/entities/sale.entity';
 
 
 @Injectable()
@@ -14,6 +15,8 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+    @InjectRepository(Sale)
+    private readonly saleRepository: Repository<Sale>,
   ){}
 
 
@@ -24,7 +27,7 @@ export class ProductsService {
 
       return {
         ok: true, 
-        message: "role creado",
+        message: "producto creado",
         status: HttpStatus.CREATED
       }
     } catch (error) {
@@ -81,5 +84,9 @@ export class ProductsService {
 
   remove(id: number) {
     return `This action removes a #${id} product`;
+  }
+
+  async report({name, quantity}: ProductSearchDto){
+    
   }
 }

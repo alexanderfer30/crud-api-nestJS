@@ -12,4 +12,7 @@ export class ProductSearchDto{
     @IsInt()
     @Min(1)
     limit: number = 5;
+
+    @IsInt()
+    quantity: number;
 }
