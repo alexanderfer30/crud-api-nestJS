@@ -7,6 +7,7 @@ import {
     OnGatewayDisconnect,
   } from '@nestjs/websockets';
 import { create } from 'domain';
+import { disconnect } from 'process';
 import { Subscriber } from 'rxjs';
   import { Server, Socket } from 'socket.io';
   
@@ -17,10 +18,14 @@ import { Subscriber } from 'rxjs';
   
     handleConnection(client: Socket) {
       console.log(`Client connected: ${client.id}`);
+      // Puedes emitir un evento personalizado como 'userConnect'
+      this.server.emit('userConnect', { message: 'A new user has connected', userId: client.id });
     }
   
     handleDisconnect(client: Socket) {
       console.log(`Client disconnected: ${client.id}`);
+      
+      this.server.emit('userDisconnect', { message: 'A user has disconnected', userId: client.id });
     }
   
     @SubscribeMessage('sendMessage')
