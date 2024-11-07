@@ -24,8 +24,8 @@ import { Subscriber } from 'rxjs';
   
     handleDisconnect(client: Socket) {
       console.log(`Client disconnected: ${client.id}`);
-      
       this.server.emit('userDisconnect', { message: 'A user has disconnected', userId: client.id });
+
     }
   
     @SubscribeMessage('sendMessage')
@@ -53,6 +53,13 @@ import { Subscriber } from 'rxjs';
       const [mensaje, salaname, username] = data;
       console.log(mensaje, salaname)
       this.server.to(salaname).emit('receiveMessage', {message:mensaje, username} )
+    }
+
+    @SubscribeMessage('UsuarioDesconectado')
+    HandleRoomOutgoing(client: Socket, data){
+      const [salaname, username] = data;
+      console.log("DESCONECTAR", username, salaname)
+      this.server.to(salaname).emit('UserOut', username)
     }
   }
   
