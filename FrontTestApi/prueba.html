@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat WebSocket Example</title>
+  <link rel="stylesheet" href="prueba.css">
+</head>
+<body>
+
+  <!-- Título Principal -->
+  <header>
+    <h1>Chat WebSocket</h1>
+    <h2>WebSocket Connection Example</h2>
+  </header>
+
+  <!-- Contenedor principal del chat -->
+  <main class="chat-container">
+    
+    <!-- Botón para unirse a la sala -->
+    <div class="room-control">
+      <button onclick="joinRoom()">Join Room</button>
+      <div id="connectionInfo"></div>
+    </div>
+
+    <!-- Formulario para enviar mensajes -->
+    <div class="message-inputs">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <input type="text" id="Username" placeholder="Nombre de Usuario" />
+      <input type="text" id="SalaName" placeholder="Nombre de la Sala" />
+      <input type="text" id="SendMessageRoom" placeholder="Mensaje para la sala" />
+    </div>
+
+    <!-- Botones de acciones -->
+    <div class="actions">
+      <button onclick="sendMessage()">Send Message</button>
+      <button onclick="sendCortarHule()">Cortar Hule</button>
+      <button onclick="sendMessageRoom()">Mensaje Sala</button>
+      <button onclick="UserOutgoing()">Salir de la Sala</button>
+    </div>
+
+    <div class="UsersOnline">
+    </div>
+
+    <div class="UsuariosFuera"></div>
+
+    <!-- Área para mostrar los mensajes recibidos -->
+    <section id="messages" class="messages-display"></section>
+
+  </main>
+
+</body>
+</html>
+
+  
+
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    // Conectarse al servidor WebSocket en el puerto 3001
+    const socket = io('http://localhost:3001');
+
+    // Escuchar el evento 'connect' para confirmar la conexión
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    socket.on('userConnect', (data) => {
+    console.log(data); // Muestra el mensaje sobre la nueva conexión
+    });
+
+    // Escuchar el evento 'userDisconnect'
+    socket.on('userDisconnect', (data) => {
+      console.log(data); // Muestra el mensaje sobre la desconexión
+    });
+
+    // Escuchar el evento 'receiveMessage' emitido por el servidor
+    socket.on('receiveMessage', (payload) => {
+      console.log('Message received:', payload);
+      displayMessage(`${payload?.username ?? "unknow"}: ${payload.message}`);
+    });
+
+    // Escuchar el evento 'corteRecibido' emitido por el servidor
+    socket.on('corteRecibido', (payload) => {
+      displayMessage('Corte recibido');
+    });
+
+    socket.on('joinedRoom', (Username)=>{
+      NotificacionMessage(`Usuario ${Username} se ha unido`);
+    })
+
+    socket.on('UserOut', (Username)=>{
+      UsersTextOut(`Usuario ${Username} ha salido de la sala`);
+    })
+
+    
+    // Función para enviar un mensaje al servidor
+    function sendMessage() {
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value;
+      const Username = document.getElementById('UserName').value;
+      
+
+      // Emitir el evento 'sendMessage' con el mensaje
+      socket.emit('sendMessage', { message, username: Username });
+      messageInput.value = ''; // Limpiar el campo de entrada
+    }
+
+//funcion para notificar que un usuario ha entrado 
+    function NotificacionMessage(UserName){
+      const messageDiv = document.querySelector('.UsersOnline')
+      const messageNoti = document.createElement('div')
+      messageNoti.textContent = `${UserName} se ha unido`;
+      messageDiv.appendChild(messageNoti)
+    }
+
+    //funcion para notificar un usuario se ha salido 
+    function UserOutgoing(){
+      const Username = document.getElementById('Username').value;
+      const SalaName = document.getElementById('SalaName').value;
+
+      socket.emit('UsuarioDesconectado', [SalaName, Username])
+    }
+
+    //funcion para mostrar el usuario que salio 
+    function UsersTextOut(UserName){
+      const messageDiv = document.querySelector('.UsuariosFuera')
+      const messageOut = document.createElement('div')
+      messageOut.textContent = `${UserName} ha salido de la sala`;
+      messageDiv.appendChild(messageOut)
+    }
+
+    // Función para enviar el evento 'cortarHule' al servidor
+    function sendCortarHule() {
+      const message = "Corte solicitado";
+
+      // Emitir el evento 'cortarHule' con el mensaje
+      socket.emit('cortarHule', { message });
+    }
+
+
+    // Función para mostrar mensajes en el área de mensajes
+    function displayMessage(text) {
+      const messagesDiv = document.getElementById('messages');
+      const messageElement = document.createElement('p');
+      messageElement.textContent = text;
+      messagesDiv.appendChild(messageElement);
+    }
+
+    // Función para unirse a una sala con el ID actual
+    function joinRoom() {
+        const Username = document.getElementById('Username').value;
+        const SalaName = document.getElementById('SalaName').value;
+
+        console.log({Username, SalaName})
+      
+      // Emitir el evento 'joinRoom' junto con el nombre de la sala
+      socket.emit('joinRoom', Username, SalaName);
+    }
+
+    function sendMessageRoom(){
+      const DataMessage = document.getElementById('SendMessageRoom').value;
+      const SalaName = document.getElementById('SalaName').value;
+      const Username = document.getElementById('Username').value;
+
+      console.log({Username})
+      socket.emit('joinRoomMessage', [DataMessage, SalaName, Username])
+    }
+
+   /*function sendMessageRoom() {
+   const DataMessage = document.getElementById('SendMessageRoom').value;
+   const SalaName = document.getElementById('SalaName').value;
+   
+   // Verificar que ambos datos estén presentes
+   if (DataMessage && SalaName) {
+      // Enviar un arreglo con los dos datos como espera el servidor
+      socket.emit('joinRoomMessage', [DataMessage, SalaName]);
+   } else {
+      console.error("Faltan datos: asegúrate de que ambos campos están llenos.");
+   }
+  }*/
+
+  </script>
+</body>
+</html>

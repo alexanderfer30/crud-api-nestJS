@@ -1,0 +1,95 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  header {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  h1, h2 {
+    margin: 5px;
+  }
+  
+  /* Chat Container */
+  .chat-container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Room Control */
+  .room-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Message Inputs */
+  .message-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .message-inputs input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Action Buttons */
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .actions button {
+    flex: 1;
+  }
+  
+  /* Messages Display */
+  .messages-display {
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #333;
+  }
+  
